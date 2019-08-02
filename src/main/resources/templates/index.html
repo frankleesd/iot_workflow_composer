@@ -1,0 +1,651 @@
+<!-- Copyright (c) Apache 2.0, original by mxGraph 
+		 Theme by concept
+-->
+<!DOCTYPE html>
+<html>
+
+<head> 	
+	<title>IoTWC</title>
+
+	<!-- Toolbar Login-->
+	<link rel="stylesheet" href="polls/assets/vendor/fonts/flag-icon-css/flag-icon.min.css">
+	<link rel="stylesheet" href="polls/assets/vendor/fonts/fontawesome/css/fontawesome-all.css">
+	<link rel="stylesheet" href="polls/assets/libs/css/style.css">
+	<link rel="stylesheet" href="polls/assets/vendor/bootstrap/css/bootstrap.min.css">
+
+	<style type="text/css" media="screen">
+		BODY {
+			font-family: Arial;
+		}
+
+		H1 {
+			font-size: 18px;
+		}
+
+		H2 {
+			font-size: 16px;
+		}
+	</style>
+
+	<!-- Sets the basepath for the library if not in same directory -->
+	<script type="text/javascript">
+		mxBasePath = '../static/src';
+	</script>
+
+	<!-- Loads and initializes the library -->
+	<script type="text/javascript" src="src/js/mxClient.js"></script>
+
+	<!-- <script type="text/javascript" src="{% static 'polls/js/jquery.js' %}"></script> -->
+
+	<!-- Example code -->
+	<script type="text/javascript">
+		// Program starts here. Creates a sample graph in the
+		// DOM node with the specified ID. This function is invoked
+		// from the onLoad event handler of the document (see below).
+
+		function main(container, outline, toolbar, sidebar, status) {
+			// Checks if the browser is supported
+			if (!mxClient.isBrowserSupported()) {
+				// Displays an error message if the browser is not supported.
+				mxUtils.error('Browser is not supported!', 200, false);
+			}
+			else {
+				// Assigns some global constants for general behaviour, eg. minimum
+				// size (in pixels) of the active region for triggering creation of
+				// new connections, the portion (100%) of the cell area to be used
+				// for triggering new connections, as well as some fading options for
+				// windows and the rubberband selection.
+				mxConstants.MIN_HOTSPOT_SIZE = 16;
+				mxConstants.DEFAULT_HOTSPOT = 1;
+
+				// Enables guides
+				mxGraphHandler.prototype.guidesEnabled = true;
+
+				// Alt disables guides
+				mxGuide.prototype.isEnabledForEvent = function (evt) {
+					return !mxEvent.isAltDown(evt);
+				};
+
+				// Enables snapping waypoints to terminals
+				mxEdgeHandler.prototype.snapToTerminals = true;
+
+				// Workaround for Internet Explorer ignoring certain CSS directives
+				if (mxClient.IS_QUIRKS) {
+					document.body.style.overflow = 'hidden';
+					new mxDivResizer(container);
+					new mxDivResizer(outline);
+					new mxDivResizer(toolbar);
+					new mxDivResizer(sidebar);
+					new mxDivResizer(status);
+				}
+
+				// Creates a wrapper editor with a graph inside the given container.
+				// The editor is used to create certain functionality for the
+				// graph, such as the rubberband selection, but most parts
+				// of the UI are custom in this example.
+				var editor = new mxEditor();
+				var graph = editor.graph;
+				var model = graph.getModel();
+
+				// Disable highlight of cells when dragging from toolbar
+				graph.setDropEnabled(false);
+
+				// Uses the port icon while connections are previewed
+				graph.connectionHandler.getConnectImage = function (state) {
+					return new mxImage(state.style[mxConstants.STYLE_IMAGE], 16, 16);
+				};
+
+				// Centers the port icon on the target port
+				graph.connectionHandler.targetConnectImage = true;
+
+				// Does not allow dangling edges
+				graph.setAllowDanglingEdges(false);
+
+				// Sets the graph container and configures the editor
+				editor.setGraphContainer(container);
+				var config = mxUtils.load(
+					'../static/polls/editors/config/keyhandler-commons.xml').
+					getDocumentElement();
+				editor.configure(config);
+
+				// Defines the default group to be used for grouping. The
+				// default group is a field in the mxEditor instance that
+				// is supposed to be a cell which is cloned for new cells.
+				// The groupBorderSize is used to define the spacing between
+				// the children of a group and the group bounds.
+				var group = new mxCell('Group', new mxGeometry(), 'group');
+				group.setVertex(true);
+				group.setConnectable(false);
+				editor.defaultGroup = group;
+				editor.groupBorderSize = 20;
+
+				// Disables drag-and-drop into non-swimlanes.
+				graph.isValidDropTarget = function (cell, cells, evt) {
+					return this.isSwimlane(cell);
+				};
+
+				// Disables drilling into non-swimlanes.
+				graph.isValidRoot = function (cell) {
+					return this.isValidDropTarget(cell);
+				}
+
+				// Does not allow selection of locked cells
+				graph.isCellSelectable = function (cell) {
+					return !this.isCellLocked(cell);
+				};
+
+				// Returns a shorter label if the cell is collapsed and no
+				// label for expanded groups
+				graph.getLabel = function (cell) {
+					var tmp = mxGraph.prototype.getLabel.apply(this, arguments); // "supercall"
+
+					if (this.isCellLocked(cell)) {
+						// Returns an empty label but makes sure an HTML
+						// element is created for the label (for event
+						// processing wrt the parent label)
+						return '';
+					}
+					else if (this.isCellCollapsed(cell)) {
+						var index = tmp.indexOf('</h1>');
+
+						if (index > 0) {
+							tmp = tmp.substring(0, index + 5);
+						}
+					}
+
+					return tmp;
+				}
+
+				// Disables HTML labels for swimlanes to avoid conflict
+				// for the event processing on the child cells. HTML
+				// labels consume events before underlying cells get the
+				// chance to process those events.
+				//
+				// NOTE: Use of HTML labels is only recommended if the specific
+				// features of such labels are required, such as special label
+				// styles or interactive form fields. Otherwise non-HTML labels
+				// should be used by not overidding the following function.
+				// See also: configureStylesheet.
+				graph.isHtmlLabel = function (cell) {
+					return !this.isSwimlane(cell);
+				}
+
+				// To disable the folding icon, use the following code:
+				/*graph.isCellFoldable = function(cell)
+				{
+					return false;
+				}*/
+
+				// Shows a "modal" window when double clicking a vertex.
+				graph.dblClick = function (evt, cell) {
+					// Do not fire a DOUBLE_CLICK event here as mxEditor will
+					// consume the event and start the in-place editor.
+					if (this.isEnabled() &&
+						!mxEvent.isConsumed(evt) &&
+						cell != null &&
+						this.isCellEditable(cell)) {
+						if (this.model.isEdge(cell) ||
+							!this.isHtmlLabel(cell)) {
+							this.startEditingAtCell(cell);
+						}
+						else {
+							var content = document.createElement('div');
+							content.innerHTML = this.convertValueToString(cell);
+							showModalWindow(this, 'Properties', content, 1400, 300);
+						}
+					}
+
+					// Disables any default behaviour for the double click
+					mxEvent.consume(evt);
+				};
+
+				// Enables new connections
+				graph.setConnectable(true);
+
+				// Adds all required styles to the graph (see below)
+				configureStylesheet(graph);
+
+				// Adds sidebar icons.
+				//
+				// NOTE: For non-HTML labels a simple string as the third argument
+				// and the alternative style as shown in configureStylesheet should
+				// be used. For example, the first call to addSidebar icon would
+				// be as follows:
+				// addSidebarIcon(graph, sidebar, 'Data', 'images/icons48/name.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Data Capture</h1><br>' +
+					'<img src="../static/polls/images/icons48/capture.png" width="48" height="48">' +
+					'<br>' +
+					'<a href="http://www.google.com" target="_blank">Browse</a>' + '<br>' + '<button>anything</button>',
+					'../static/polls/images/icons48/capture.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Data Store</h1><br>' +
+					'<img src="../static/polls/images/icons48/store.png" width="48" height="48">' +
+					'<br><select><option>Value1</option><option>Value2</option></select><br>',
+					'../static/polls/images/icons48/store.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Data Inference</h1><br>' +
+					'<img src="../static/polls/images/icons48/inference.png" width="48" height="48">' +
+					'<br>' +
+					'<button onclick="mxUtils.alert(\'generate\');">Generate</button>',
+					'../static/polls/images/icons48/inference.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Data Filter</h1><br>' +
+					'<img src="../static/polls/images/icons48/filter.png" width="48" height="48">' +
+					'<br><input type="checkbox"/>Checkbox 1',
+					'../static/polls/images/icons48/filter.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Data Aggregate</h1><br>' +
+					'<img src="../static/polls/images/icons48/aggregate.png" width="48" height="48">' +
+					'<br>' +
+					'<input type="text" size="12" value="127.0.0.1"/>',
+					'../static/polls/images/icons48/aggregate.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Data Visualisation</h1><br>' +
+					'<img src="../static/polls/images/icons48/visualisation.png" width="48" height="48">' +
+					'<br><select><option>Value1</option><option>Value2</option><option>Value3</option></select><br>',
+					'../static/polls/images/icons48/visualisation.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Data Traslate</h1><br>' +
+					'<img src="../static/polls/images/icons48/translate.png" width="48" height="48">' +
+					'<br><input type="checkbox"/>Checkbox 1',
+					'../static/polls/images/icons48/translate.png');
+				addSidebarIcon(graph, sidebar,
+					'<h1 style="margin:0px;">Actuation</h1><br>' +
+					'<img src="../static/polls/images/icons48/actuation.png" width="48" height="48">' +
+					'<br><select><option>Value1</option><option>Value2</option></select><br>',
+					'../static/polls/images/icons48/actuation.png');
+
+				// Displays useful hints in a small semi-transparent box.
+				var hints = document.createElement('div');
+				hints.style.position = 'absolute';
+				hints.style.overflow = 'hidden';
+				hints.style.width = '230px';
+				hints.style.bottom = '56px';
+				hints.style.right = '20px';
+
+				hints.style.background = 'black';
+				hints.style.color = 'white';
+				hints.style.fontFamily = 'Arial';
+				hints.style.fontSize = '10px';
+				hints.style.padding = '4px';
+
+				//Create popup tool tips
+				mxUtils.setOpacity(hints, 50);
+				
+				mxUtils.writeln(hints, '- Drag an image from the sidebar to the dashboard');
+				mxUtils.writeln(hints, '- Doubleclick on a activity to edit');
+				mxUtils.writeln(hints, '- Use toolbar for customise for each activity');
+				mxUtils.writeln(hints, '- Move the mouse over an activity to see a workflow');
+				mxUtils.writeln(hints, '- Click and drag a point to make a pipeline');
+				document.body.appendChild(hints);
+
+				// Creates a new DIV that is used as a toolbar and adds
+				// toolbar buttons.
+				var spacer = document.createElement('div');
+				spacer.style.display = 'inline';
+				spacer.style.padding = '8px';
+
+				// Add grouping
+				addToolbarButton(editor, toolbar, 'groupOrUngroup', '(select)group', '../static/polls/images/grouping.png');
+				
+				// Defines a new action for deleting or ungrouping
+				editor.addAction('groupOrUngroup', function(editor, cell)
+				{
+					cell = cell || editor.graph.getSelectionCell();
+					if (cell != null && editor.graph.isSwimlane(cell))
+					{
+						editor.execute('ungroup', cell);
+					}
+					else
+					{
+						editor.execute('group');
+					}
+				});
+
+				// Defines a new action for deleting or ungrouping
+
+				addToolbarButton(editor, toolbar, 'delete', 'Delete', '../static/polls/images/remove.png');
+
+				toolbar.appendChild(spacer.cloneNode(true));
+
+				//add cut copy paste
+				addToolbarButton(editor, toolbar, 'cut', 'Cut', '../static/polls/images/cutting.png');
+				addToolbarButton(editor, toolbar, 'copy', 'Copy', '../static/polls/images/copying.png');
+				addToolbarButton(editor, toolbar, 'paste', 'Paste', '../static/polls/images/pasting.png');
+
+				toolbar.appendChild(spacer.cloneNode(true));
+
+				//add undo redo here
+				addToolbarButton(editor, toolbar, 'undo', '', '../static/polls/images/backing.png');
+				addToolbarButton(editor, toolbar, 'redo', '', '../static/polls/images/forwarding.png');
+
+				toolbar.appendChild(spacer.cloneNode(true));
+
+				//add screenshot
+				addToolbarButton(editor, toolbar, 'show', 'Screenshot', '../static/polls/images/showing.png');
+
+				toolbar.appendChild(spacer.cloneNode(true));
+
+				// Defines a new execute action
+
+
+				addToolbarButton(editor, toolbar, 'export', 'Execute', '../static/polls/images/execute.png');
+
+				// ---
+
+				// Adds status utility bar at the bottom
+				addToolbarButton(editor, status, 'collapseAll', 'Collapse All', '../static/polls/images/navigate-all.png', true);
+				addToolbarButton(editor, status, 'expandAll', 'Expand All', '../static/polls/images/expand-all.png', true);
+
+				
+				
+
+				status.appendChild(spacer.cloneNode(true));
+
+				addToolbarButton(editor, status, 'zoomIn', '', '../static/polls/images/zoom-in.png', true);
+				addToolbarButton(editor, status, 'zoomOut', '', '../static/polls/images/zoom-out.png', true);
+				addToolbarButton(editor, status, 'actualSize', '', '../static/polls/images/zoom-auto.png', true);
+				
+
+				// Creates the outline (navigator, overview) for moving
+				// around the graph in the top, right corner of the window.
+				var outln = new mxOutline(graph, outline);
+
+				// To show the images in the outline, uncomment the following code
+				//outln.outline.labelsVisible = true;
+				//outln.outline.setHtmlLabels(true);
+
+				// Fades-out the splash screen after the UI has been loaded.
+				var splash = document.getElementById('splash');
+				if (splash != null) {
+					try {
+						mxEvent.release(splash);
+						mxEffects.fadeOut(splash, 100, true);
+					}
+					catch (e) {
+
+						// mxUtils is not available (library not loaded)
+						splash.parentNode.removeChild(splash);
+					}
+				}
+			}
+		};
+
+		function addToolbarButton(editor, toolbar, action, label, image, isTransparent) {
+			var button = document.createElement('button');
+			button.style.fontSize = '10';
+			if (image != null) {
+				var img = document.createElement('img');
+				img.setAttribute('src', image);
+				img.style.width = '16px';
+				img.style.height = '16px';
+				img.style.verticalAlign = 'middle';
+				img.style.marginRight = '2px';
+				button.appendChild(img);
+			}
+			if (isTransparent) {
+				button.style.background = 'transparent';
+				button.style.color = '#FFFFFF';
+				button.style.border = 'none';
+			}
+			mxEvent.addListener(button, 'click', function (evt) {
+				editor.execute(action);
+			});
+			mxUtils.write(button, label);
+			toolbar.appendChild(button);
+		};
+
+		function showModalWindow(graph, title, content, width, height) {
+			var background = document.createElement('div');
+			background.style.position = 'absolute';
+			background.style.left = '0px';
+			background.style.top = '0px';
+			background.style.right = '0px';
+			background.style.bottom = '0px';
+			background.style.background = 'black';
+			mxUtils.setOpacity(background, 50);
+			document.body.appendChild(background);
+
+			if (mxClient.IS_IE) {
+				new mxDivResizer(background);
+			}
+
+			var x = Math.max(0, document.body.scrollWidth / 2 - width / 2);
+			var y = Math.max(10, (document.body.scrollHeight ||
+				document.documentElement.scrollHeight) / 2 - height * 2 / 3);
+			var wnd = new mxWindow(title, content, x, y, width, height, false, true);
+			wnd.setClosable(true);
+
+			// Fades the background out after after the window has been closed
+			wnd.addListener(mxEvent.DESTROY, function (evt) {
+				graph.setEnabled(true);
+				mxEffects.fadeOut(background, 50, true,
+					10, 30, true);
+			});
+
+			graph.setEnabled(false);
+			graph.tooltipHandler.hide();
+			wnd.setVisible(true);
+		};
+
+		function addSidebarIcon(graph, sidebar, label, image) {
+			// Function that is executed when the image is dropped on
+			// the graph. The cell argument points to the cell under
+			// the mousepointer if there is one.
+			var funct = function (graph, evt, cell, x, y) {
+				var parent = graph.getDefaultParent();
+				var model = graph.getModel();
+
+				var v1 = null;
+
+				model.beginUpdate();
+				try {
+					// NOTE: components size to show up between expand - collapse
+					// pt.x, pt.y, 120, 120, 'image=' + image);
+
+					//Presents the expand size
+					v1 = graph.insertVertex(parent, null, label, x, y, 160, 120);
+					v1.setConnectable(false);
+
+					// Presents the collapsed size
+					v1.geometry.alternateBounds = new mxRectangle(0, 0, 160, 40);
+
+					// NOTE: Adds the point to create relations between components
+					// customize, pt.x, pt.y, images
+					var port = graph.insertVertex(v1, null, 'Pipeline', 0, 0.50, 16, 16,
+						'port;image=../static/polls/images/overlays/left.png;align=right;imageAlign=right;spacingRight=18', true);
+					port.geometry.offset = new mxPoint(-8, -8);
+
+					var port = graph.insertVertex(v1, null, 'Pipeline', 1, 0.50, 16, 16,
+						'port;image=../static/polls/images/overlays/right.png;spacingLeft=18', true);
+					port.geometry.offset = new mxPoint(-8, -8);
+
+				}
+				finally {
+					model.endUpdate();
+				}
+
+				graph.setSelectionCell(v1);
+			}
+
+			// Creates the image which is used as the sidebar icon (drag source)
+			var img = document.createElement('img');
+			img.setAttribute('src', image);
+			img.style.width = '48px';
+			img.style.height = '48px';
+			img.title = 'Drag this to create a new workflow composition';
+			sidebar.appendChild(img);
+
+			var dragElt = document.createElement('div');
+			dragElt.style.border = 'dashed black 1px';
+			dragElt.style.width = '120px';
+			dragElt.style.height = '120px';
+
+			// Creates the image which is used as the drag icon (preview)
+			var ds = mxUtils.makeDraggable(img, graph, funct, dragElt, 0, 0, true, true);
+			ds.setGuidesEnabled(true);
+		};
+
+		function configureStylesheet(graph) {
+			var style = new Object();
+			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+			style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+			style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+			style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+			style[mxConstants.STYLE_GRADIENTCOLOR] = '#41B9F5';
+			style[mxConstants.STYLE_FILLCOLOR] = '#8CCDF5';
+			style[mxConstants.STYLE_STROKECOLOR] = '#1B78C8';
+			style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+			style[mxConstants.STYLE_ROUNDED] = true;
+			style[mxConstants.STYLE_OPACITY] = '80';
+			style[mxConstants.STYLE_FONTSIZE] = '12';
+			style[mxConstants.STYLE_FONTSTYLE] = 0;
+			style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
+			style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
+			graph.getStylesheet().putDefaultVertexStyle(style);
+
+			// NOTE: Alternative vertex style for non-HTML labels should be as
+			// follows. This repaces the above style for HTML labels.
+			/*var style = new Object();
+			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_LABEL;
+			style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+			style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+			style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+			style[mxConstants.STYLE_IMAGE_ALIGN] = mxConstants.ALIGN_CENTER;
+			style[mxConstants.STYLE_IMAGE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+			style[mxConstants.STYLE_SPACING_TOP] = '56';
+			style[mxConstants.STYLE_GRADIENTCOLOR] = '#7d85df';
+			style[mxConstants.STYLE_STROKECOLOR] = '#5d65df';
+			style[mxConstants.STYLE_FILLCOLOR] = '#adc5ff';
+			style[mxConstants.STYLE_FONTCOLOR] = '#1d258f';
+			style[mxConstants.STYLE_FONTFAMILY] = 'Verdana';
+			style[mxConstants.STYLE_FONTSIZE] = '12';
+			style[mxConstants.STYLE_FONTSTYLE] = '1';
+			style[mxConstants.STYLE_ROUNDED] = '1';
+			style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
+			style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
+			style[mxConstants.STYLE_OPACITY] = '80';
+			graph.getStylesheet().putDefaultVertexStyle(style);*/
+
+			style = new Object();
+			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
+			style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+			style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+			style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+			style[mxConstants.STYLE_FILLCOLOR] = '#FF9103';
+			style[mxConstants.STYLE_GRADIENTCOLOR] = '#F8C48B';
+			style[mxConstants.STYLE_STROKECOLOR] = '#E86A00';
+			style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+			style[mxConstants.STYLE_ROUNDED] = true;
+			style[mxConstants.STYLE_OPACITY] = '80';
+			style[mxConstants.STYLE_STARTSIZE] = '30';
+			style[mxConstants.STYLE_FONTSIZE] = '16';
+			style[mxConstants.STYLE_FONTSTYLE] = 1;
+			graph.getStylesheet().putCellStyle('group', style);
+
+			style = new Object();
+			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_IMAGE;
+			style[mxConstants.STYLE_FONTCOLOR] = '#774400';
+			style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+			style[mxConstants.STYLE_PERIMETER_SPACING] = '6';
+			style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_LEFT;
+			style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+			style[mxConstants.STYLE_FONTSIZE] = '10';
+			style[mxConstants.STYLE_FONTSTYLE] = 2;
+			style[mxConstants.STYLE_IMAGE_WIDTH] = '16';
+			style[mxConstants.STYLE_IMAGE_HEIGHT] = '16';
+			graph.getStylesheet().putCellStyle('port', style);
+
+			style = graph.getStylesheet().getDefaultEdgeStyle();
+			style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = '#FFFFFF';
+			style[mxConstants.STYLE_STROKEWIDTH] = '2';
+			style[mxConstants.STYLE_ROUNDED] = true;
+			style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+		};
+	</script>
+</head>
+
+<!-- Page passes the container for the graph to the program -->
+
+<body onload="main(document.getElementById('graphContainer'),
+			document.getElementById('outlineContainer'),
+		 	document.getElementById('toolbarContainer'),
+			document.getElementById('sidebarContainer'),
+			document.getElementById('statusContainer'));" style="margin:0px;">
+
+
+<!-- Creates a container for the splash screen -->
+	<div id="splash" style="position:absolute;top:0px;left:0px;width:100%;height:100%;background:white;z-index:1;">
+		<center id="splash" style="padding-top:230px;">
+			<img src="polls/images/loading.gif">
+		</center>
+	</div>
+
+	<!-- ============================================================== -->
+	<!-- navbar -->
+	<!-- ============================================================== -->
+	<div class="dashboard-header">
+		<nav class="navbar navbar-expand-lg bg-white fixed-top">
+			<a class="navbar-brand" href="index.html"><img src="polls/assets/images/iotwc-logo.jpg" alt=""
+					class="user-avatar-md rounded-circle">IoTWC</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+				aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse " id="navbarSupportedContent">
+				<ul class="navbar-nav ml-auto navbar-right-top">
+					<li class="nav-item dropdown nav-user">
+						<a class="nav-link nav-user-img" href="#" id="navbarDropdownMenuLink2" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="false"><img src="polls/assets/images/avatar-1.jpg" alt=""
+								class="user-avatar-md rounded-circle"></a>
+						<div class="dropdown-menu dropdown-menu-right nav-user-dropdown"
+							aria-labelledby="navbarDropdownMenuLink2">
+							<div class="nav-user-info">
+								<h5 class="mb-0 text-white nav-user-name">Kritphongphan Phongsuwan</h5>
+								<span class="status"></span><span class="ml-2">Available</span>
+							</div>
+							<a class="dropdown-item" href="#"><i class="fas fa-user mr-2"></i>Account</a>
+							<a class="dropdown-item" href="#"><i class="fas fa-cog mr-2"></i>Setting</a>
+							<a class="dropdown-item" href="#"><i class="fas fa-power-off mr-2"></i>Logout</a>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</nav>
+	</div>
+	
+	<!-- ============================================================== -->
+	<!-- end navbar -->
+	<!-- ============================================================== -->
+
+	<!-- Creates a container for the sidebar -->
+	<div id="toolbarContainer"
+		style="position:absolute;white-space:nowrap;overflow:hidden;top:60px;left:0px;height:36px;right:0px;padding:6px;background-color: #323975;">
+	</div>
+
+	<!-- Creates a container for the toolboox -->
+	<div id="sidebarContainer"
+		style="position:absolute;overflow:hidden;top:96px;left:0px;bottom:36px;width:56px;padding-top:10px;padding-left:4px;background-color: #3c4280;">
+	</div>
+
+	<!-- Creates a container for the graph -->
+	<div id="graphContainer"
+		style="position:absolute;overflow:hidden;top:96px;left:60px;bottom:36px;right:0px;background-image:url('../static/polls/images/grid.gif');cursor:default;">
+	</div>
+
+	<!-- Creates a container for the outline (Map navigation) -->
+	<div id="outlineContainer"
+	style="position:absolute;overflow:hidden;top:96px;right:0px;width:200px;height:140px;background:transparent;border-style:solid;border-color:black;">
+    </div>
+
+	<!-- Creates a container for the sidebar -->
+	<div id="statusContainer"
+		style="text-align:right;position:absolute;overflow:hidden;bottom:0px;left:0px;height:36px;right:0px;color:white;padding:6px;background-color: #323975;">
+		<div style="font-size:10pt;float:left;">
+			Copyright 2019 - IoTWC
+		</div>
+	</div>	
+</body>
+
+</html>
