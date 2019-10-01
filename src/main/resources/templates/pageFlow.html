@@ -555,63 +555,127 @@
   Diagram Model saved in JSON format:
   <br />
   <textarea id="mySavedModel" style="width:100%;height:300px">
-{ "class": "go.GraphLinksModel",
-  "copiesArrays": true,
-  "copiesArrayObjects": true,
-  "nodeDataArray": [
-    { "key": -1, "category": "Source", "text": "Search", "name":"Stella Payne Diaz", "title":"CEO"},
-    { "key": -2, "category": "Source", "text": "Referral" },
-    { "key": -3, "category": "Source", "text": "Advertising" },
-
-    { "key": 0, "name":"Luke Warm", "title":"VP Marketing/Sales"},
-    { "key": 1, "text": "Products" },
-    { "key": 2, "text": "Buy" },
-    { "key": 3, "text": "Samples" },
-    { "key": 5, "text": "Documentation" },
-    { "key": 6, "text": "Download" },
-
-    { "key": 100, "category": "DesiredEvent", "text": "Ordered!" },
-    { "key": 101, "category": "DesiredEvent", "text": "Downloaded!" },
-
-    { "key": 200, "category": "UndesiredEvent",
-      "reasonsList": [
-        {"text":"Needs redesign?"},
-        {"text":"Wrong Product?"} ]},
-    { "key": 201, "category": "UndesiredEvent",
-      "reasonsList": [
-        {"text":"Need better samples?"},
-        {"text":"Bad landing page for Advertising?"} ]},
-    { "key": 202, "category": "UndesiredEvent",
-      "reasonsList": [
-        {"text":"Reconsider Pricing?"},
-        {"text":"Confusing Cart?"} ]},
-
-    { "category": "Comment", "text": "Add notes with general comments for the next team meeting" }
-
-  ],
-  "linkDataArray": [
-    { "from": -1, "to": 0 },
-    { "from": -2, "to": 0 },
-    { "from": -2, "to": 3 },
-    { "from": -3, "to": 3 },
-    { "from":  0, "to": 1 },
-    { "from":  1, "to": 2 },
-    { "from":  1, "to": 3 },
-    { "from":  0, "to": 5 },
-    { "from":  5, "to": 3 },
-    { "from":  3, "to": 2 },
-
-
-    { "from":  3, "to": 6 },
-
-    { "from":  2, "to": 100 },
-    { "from":  6, "to": 101 },
-
-    { "from":  0, "to": 200 },
-    { "from":  3, "to": 201 },
-    { "from":  2, "to": 202 }
-  ]
-}
+    { 
+      "class":"GraphLinksModel",
+      "copiesArrays":true,
+      "copiesArrayObjects":true,
+      "nodeDataArray":[ 
+         { 
+            "category":"Data Capture",
+            "key":-1,
+            "loc":"0 2.238576250846023",
+            "text":"sensor",
+            "ResourceCost/ResourceQoS":"1",
+            "ResourceCost/Data":"1",
+            "ResourceQoS/Data":"1",
+            "HardwareCost/HostingCost":"1",
+            "HardwareCost/NetworkCost":"1",
+            "HostingCost/NetworkCost":"1",
+            "Reliability/Mobility":"1",
+            "Reliability/Heterogeneity":"1",
+            "Reliability/Scalability":"1",
+            "Reliability/Capability":"1",
+            "Reliability/ResourceAvaibility":"1",
+            "Mobility/Heterogeneity":"1",
+            "Mobility/Scalability":"1",
+            "Mobility/Capability":"1",
+            "Mobility/ResourceAvailability":"1",
+            "Heterogeneity/Scalability":"1",
+            "Heterogeneity/Capability":"1",
+            "Heterogeneity/ResourceAvailability":"1",
+            "Scalability/Capability":"1",
+            "Scalability/ResourceAvailability":"1",
+            "Capability/ResourceAvailability":"1",
+            "DataPrivacy/DataAvailability":"1",
+            "DataPrivacy/LongTermStorage":"1",
+            "DataPrivacy/DataReplication":"1",
+            "DataPrivacy/DataIntegrity":"1",
+            "DataPrivacy/DataFreshness":"1",
+            "DataPrivacy/Latency":"1",
+            "DataAvailability/LongTermStorage":"1",
+            "DataAvailability/DataReplication":"1",
+            "DataAvailability/DataIntegrity":"1",
+            "DataAvailability/DataFreshness":"1",
+            "DataAvailability/Latency":"1",
+            "LongTermStorage/DataReplication":"1",
+            "LongTermStorage/DataIntegrity":"1",
+            "LongTermStorage/DataFreshness":"1",
+            "LongTermStorage/Latency":"1",
+            "DataReplication/DataIntegrity":"1",
+            "DataReplication/DataFreshness":"1",
+            "DataReplication/Latency":"1",
+            "DataIntegrity/DataFreshness":"1",
+            "DataIntegrity/Latency":"1",
+            "DataFreshness/Latency":"1"
+         },
+         { 
+            "category":"Data Store",
+            "key":-2,
+            "loc":"145.35300191725324 0",
+            "text":"db",
+            "ResourceCost/ResourceQoS":"1/3",
+            "ResourceCost/Data":"1/3",
+            "ResourceQoS/Data":"1",
+            "HardwareCost/HostingCost":"5",
+            "HardwareCost/NetworkCost":"3",
+            "HostingCost/NetworkCost":"1/3",
+            "Reliability/Mobility":"9",
+            "Reliability/Heterogeneity":"5",
+            "Reliability/Scalability":"1/3",
+            "Reliability/Capability":"1/5",
+            "Reliability/ResourceAvaibility":"3",
+            "Mobility/Heterogeneity":"1/5",
+            "Mobility/Scalability":"5",
+            "Mobility/ResourceAvailability":"3",
+            "Mobility/Capability":"1/5",
+            "Heterogeneity/Scalability":"5",
+            "Heterogeneity/Capability":"1/3",
+            "Heterogeneity/ResourceAvailability":"1/7",
+            "Scalability/Capability":"1/9",
+            "Scalability/ResourceAvailability":"1",
+            "Capability/ResourceAvailability":"3",
+            "DataPrivacy/DataAvailability":"1/3",
+            "DataPrivacy/LongTermStorage":"1/7",
+            "DataPrivacy/DataReplication":"7",
+            "DataPrivacy/DataIntegrity":"1/5",
+            "DataPrivacy/DataFreshness":"3",
+            "DataPrivacy/Latency":"1/3",
+            "DataAvailability/LongTermStorage":"3",
+            "DataAvailability/DataReplication":"1/7",
+            "DataAvailability/DataIntegrity":"5",
+            "DataAvailability/DataFreshness":"1/5",
+            "DataAvailability/Latency":"5",
+            "LongTermStorage/DataReplication":"1/5",
+            "LongTermStorage/DataIntegrity":"7",
+            "LongTermStorage/DataFreshness":"1/3",
+            "LongTermStorage/Latency":"5",
+            "DataReplication/DataIntegrity":"1/5",
+            "DataReplication/DataFreshness":"3",
+            "DataReplication/Latency":"1/5",
+            "DataIntegrity/DataFreshness":"1/7",
+            "DataIntegrity/Latency":"3",
+            "DataFreshness/Latency":"1"
+         }
+      ],
+      "linkDataArray":[ 
+         { 
+            "from":-1,
+            "to":-2,
+            "points":[ 
+               75.35300191725325,
+               20.8834129333496,
+               98.68633525058658,
+               20.883412933349604,
+               122.01966858391991,
+               20.883412933349607,
+               145.35300191725324,
+               20.88341293334961
+            ],
+            "LinkType":"Wi-Fi",
+            "text":""
+         }
+      ]
+   }
   </textarea>
 </div>
 </body>
