@@ -36,6 +36,7 @@ public class JsonController {
                 AHP ahp = new AHP();
                 String ahpResult = ahp.AHPOperation(jsonObj);
 
+                System.out.println(ahpResult);
                 System.out.println(jsonObj.get("category"));
             }    
         }

@@ -3,7 +3,10 @@ package com.example.iot_workflow_composor.controller;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.iot_workflow_composor.ahp.lib.jama.Matrix;
@@ -14,6 +17,7 @@ import com.example.iot_workflow_composor.ahp.lib.model.ahp.configuration.Decisio
 import com.example.iot_workflow_composor.ahp.lib.model.ahp.configuration.Goal;
 import com.example.iot_workflow_composor.ahp.lib.model.ahp.configuration.GoalType;
 import com.example.iot_workflow_composor.ahp.lib.model.ahp.values.Evaluation;
+import com.example.iot_workflow_composor.ahp.lib.model.ahp.values.EvaluationResult;
 import com.example.iot_workflow_composor.ahp.lib.model.ahp.values.GoalImportance;
 import com.example.iot_workflow_composor.utils.FractionToDouble;
 
@@ -27,7 +31,7 @@ public class AHP {
         
         //set goals
         Goal g1 = new Goal("ResourceCost");
-		g1.setGoalType(GoalType.NEGATIVE);
+		//g1.setGoalType(GoalType.NEGATIVE);
 		Goal g2 = new Goal("ResourceQoS");
         Goal g3 = new Goal("Data");
 
@@ -178,11 +182,11 @@ public class AHP {
 		Alternative a3 = new Alternative();
         a3.setName("CKR3");
         Alternative a4 = new Alternative();
-        a3.setName("CKR4");
+        a4.setName("CKR4");
         Alternative a5 = new Alternative();
-        a3.setName("CKR5");
+        a5.setName("CKR5");
         Alternative a6 = new Alternative();
-		a3.setName("CKR6");
+		a6.setName("CKR6");
 
 		decision.addGoal(g1);
 		decision.addGoal(g2);
@@ -210,11 +214,11 @@ public class AHP {
 
         //set goal importance
         decision.getImportanceGoals(GoalType.POSITIVE).add(
-            new GoalImportance(1, 2, g1g2Double, null));
+            new GoalImportance(0, 1, g1g2Double - 1D, null));
         decision.getImportanceGoals(GoalType.POSITIVE).add(
-            new GoalImportance(1, 3, g1g3Double, null));
+            new GoalImportance(0, 2, g1g3Double - 1D, null));
         decision.getImportanceGoals(GoalType.POSITIVE).add(
-            new GoalImportance(2, 3, g2g3Double, null));
+            new GoalImportance(1, 2, g2g3Double - 1D, null));
 
         System.out.println("\n Weights of Criteria ResourceCost");
 		double[][] crit1 = { { 1, c11c12Double, c11c13Double }, { 1 / c11c12Double, 1, c12c13Double }, { 1 / c11c13Double, 1 / c12c13Double, 1 } };
@@ -272,15 +276,147 @@ public class AHP {
 
         // Reliability 
         // set by admin
-        //TODO: change numbers based on slides
-        double crit21[][] = { { 1, 1 / 3D, 1 / 9D , 9 , 9 , 9}, { 3 , 1, 1 / 3D , 9 , 9 , 9}, { 9 , 3 , 1 , 9 , 9 , 9}, 
-                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        double crit21[][] = { { 1, 1 , 1 , 1 / 5D , 1 / 5D , 1 / 5D }, { 1, 1 , 1 , 1 / 5D , 1 / 5D , 1 / 5D }, { 1, 1 , 1 , 1 / 5D , 1 / 5D , 1 / 5D }, 
+                    {5 , 5 , 5, 1 , 1, 1}, {5 , 5 , 5 , 1 , 1, 1}, {5 , 5 , 5 , 1 , 1, 1} };
         Matrix crit21M = new Matrix(crit21);
         //System.out.println(Arrays.deepToString(crit21));
         ev.getEvaluations().add(crit21M);
         
+        // Mobility 
+        // set by admin
+        double crit22[][] = { { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, 
+                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        Matrix crit22M = new Matrix(crit22);
+        //System.out.println(Arrays.deepToString(crit22));
+        ev.getEvaluations().add(crit22M);
+
+        // Heterogeneity 
+        // set by admin
+        double crit23[][] = { { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, 
+                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        Matrix crit23M = new Matrix(crit23);
+        //System.out.println(Arrays.deepToString(crit23));
+        ev.getEvaluations().add(crit23M);
+
+        // Scalability 
+        // set by admin
+        double crit24[][] = { { 1, 1 , 1 , 1 / 9D , 1 / 9D , 1 / 9D }, { 1, 1 , 1 , 1 / 9D , 1 / 9D , 1 / 9D }, { 1, 1 , 1 , 1 / 9D , 1 / 9D , 1 / 9D }, 
+                    {9 , 9 , 9, 1 , 1, 1}, {9 , 9 , 9, 1 , 1, 1}, {9 , 9 , 9, 1 , 1, 1} };
+        Matrix crit24M = new Matrix(crit24);
+        //System.out.println(Arrays.deepToString(crit24));
+        ev.getEvaluations().add(crit24M);
+
+        // Capability 
+        // set by admin
+        double crit25[][] = { { 1, 1 / 3D , 1 / 5D , 1 / 5D , 1 / 7D , 1 / 9D }, { 3 , 1 , 1 / 3D, 1 / 3D , 1 / 3D , 1 / 5D }, { 5, 3 , 1 , 1 , 1 / 3D , 1 / 3D }, {5 , 3 , 1, 1 , 1 / 3D, 1/ 5D}, {7 , 3 , 3 , 3 , 1, 1 / 3D}, {9 , 5 , 3 , 5 , 3, 1} };
+        Matrix crit25M = new Matrix(crit25);
+        //System.out.println(Arrays.deepToString(crit25));
+        ev.getEvaluations().add(crit25M);
+
+        // Resource Availability 
+        // set by admin
+        double crit26[][] = { { 1, 1 , 1 , 1 / 5D , 1 / 5D , 1 / 5D }, { 1, 1 , 1 , 1 / 5D , 1 / 5D , 1 / 5D }, { 1, 1 , 1 , 1 / 5D , 1 / 5D , 1 / 5D }, 
+                    {5 , 5 , 5, 1 , 1, 1}, {5 , 5 , 5 , 1 , 1, 1}, {5 , 5 , 5 , 1 , 1, 1} };
+        Matrix crit26M = new Matrix(crit26);
+        //System.out.println(Arrays.deepToString(crit26));
+        ev.getEvaluations().add(crit26M);
+
+        evals.add(ev);
+
         // Data Goal Evaluation
 		ev = new Evaluation();
+
+        // Data Privacy 
+        // set by admin
+        double crit31[][] = { { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, 
+                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        Matrix crit31M = new Matrix(crit31);
+        //System.out.println(Arrays.deepToString(crit31));
+        ev.getEvaluations().add(crit31M);
+
+        // Data Availability 
+        // set by admin
+        double crit32[][] = { { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, 
+                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        Matrix crit32M = new Matrix(crit32);
+        //System.out.println(Arrays.deepToString(crit32));
+        ev.getEvaluations().add(crit32M);
+
+        // LongTerm Storage 
+        // set by admin
+        double crit33[][] = { { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, 
+                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        Matrix crit33M = new Matrix(crit33);
+        //System.out.println(Arrays.deepToString(crit33));
+        ev.getEvaluations().add(crit33M);
+
+        // Data Replication 
+        // set by admin
+        double crit34[][] = { { 1, 1 , 1 , 1 / 9D , 1 / 9D , 1 / 9D }, { 1, 1 , 1 , 1 / 9D , 1 / 9D , 1 / 9D }, { 1, 1 , 1 , 1 / 9D , 1 / 9D , 1 / 9D }, 
+                    {9 , 9 , 9, 1 , 1, 1}, {9 , 9 , 9, 1 , 1, 1}, {9 , 9 , 9, 1 , 1, 1} };
+        Matrix crit34M = new Matrix(crit34);
+        //System.out.println(Arrays.deepToString(crit34));
+        ev.getEvaluations().add(crit34M);
+
+        // Data Integrity 
+        // set by admin
+        double crit35[][] = { { 1, 1 , 1 , 5 , 5 , 5 }, { 1, 1 , 1 , 5 , 5 , 5 }, { 1, 1 , 1 , 5 , 5 , 5 }, 
+                    {1 / 5D, 1 / 5D, 1 / 5D, 1 , 1, 1}, {1 / 5D, 1 / 5D, 1 / 5D, 1 , 1, 1}, {1 / 5D, 1 / 5D, 1 / 5D, 1 , 1, 1} };
+        Matrix crit35M = new Matrix(crit35);
+        //System.out.println(Arrays.deepToString(crit35));
+        ev.getEvaluations().add(crit35M);
+
+        // Data Freshness 
+        // set by admin
+        double crit36[][] = { { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, 
+                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        Matrix crit36M = new Matrix(crit36);
+        //System.out.println(Arrays.deepToString(crit36));
+        ev.getEvaluations().add(crit36M);
+
+        // Latency 
+        // set by admin
+        double crit37[][] = { { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, { 1, 1 , 1 , 9 , 9 , 9 }, 
+                    {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1}, {1 / 9D, 1 / 9D, 1 / 9D, 1 , 1, 1} };
+        Matrix crit37M = new Matrix(crit37);
+        //System.out.println(Arrays.deepToString(crit37));
+        ev.getEvaluations().add(crit37M);
+
+        evals.add(ev);
+
+        try {
+			System.out.println(((Goal) decision.getGoals().iterator().next())
+					.getLeafCriteria());
+
+            EvaluationResult results = ahp.evaluateFull(evals);
+            //System.out.println(results);
+			System.out.println("Multiplicative: "
+					+ results.getResultMultiplicativeIndexMap());
+			System.out.println("Additive: "
+					+ results.getResultAdditiveIndexMap());
+			System.out.println("Positive: "
+					+ results.getResultPositiveGoalsMap());
+			System.out.println("Negative: "
+                    + results.getResultNegativeGoalsMap());
+            
+            List<Map.Entry<Alternative, Double>> list_Data = new ArrayList<Map.Entry<Alternative, Double>>(results.getResultPositiveGoalsMap().entrySet());
+            Collections.sort(list_Data, new Comparator<Map.Entry<Alternative, Double>>()
+            {  
+                public int compare(Map.Entry<Alternative, Double> o1, Map.Entry<Alternative, Double> o2)
+                {
+                    if ((o2.getValue() - o1.getValue())>0)
+                    return 1;
+                    else if((o2.getValue() - o1.getValue())==0)
+                    return 0;
+                    else 
+                    return -1;
+                }
+            }
+            );  
+            ahpResult = list_Data.get(0).getKey().getName();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
         return ahpResult;
     }
