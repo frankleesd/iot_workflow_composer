@@ -6,8 +6,7 @@ import java.text.ParseException;
 
 public class FractionToDouble {
 
-  public Double fractionToDouble(String fraction)
-      throws ParseException {
+  public Double fractionToDouble(String fraction) throws ParseException {
     Double d = null;
     if (fraction != null) {
       if (fraction.contains("/")) {
@@ -18,8 +17,7 @@ public class FractionToDouble {
           BigDecimal response = d1.divide(d2, MathContext.DECIMAL128);
           d = response.doubleValue();
         }
-      }
-      else {
+      } else {
         d = Double.valueOf(fraction);
       }
     }

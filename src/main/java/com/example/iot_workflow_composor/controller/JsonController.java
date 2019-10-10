@@ -23,10 +23,10 @@ public class JsonController {
     @ResponseBody
     @RequestMapping("/hello")
     public String JsonOperation(@RequestBody String jsonString) throws ParseException {
-        
-        //System.out.println(jsonString);
 
-        //convert jsonString to json object
+        // System.out.println(jsonString);
+
+        // convert jsonString to json object
         JSONObject json = JSON.parseObject(jsonString);
         JSONArray resultJsonArray = new JSONArray();
 
@@ -37,36 +37,36 @@ public class JsonController {
 
         System.out.println(nodeDataArray);
 
-        if(nodeDataArray.size() > 0)
-        {
-            for(int i = 0; i < nodeDataArray.size(); i++)
-            {
+        if (nodeDataArray.size() > 0) {
+            for (int i = 0; i < nodeDataArray.size(); i++) {
                 JSONObject jsonObj = nodeDataArray.getJSONObject(i);
                 JSONObject jsonObjOne = new JSONObject();
-                
-                AHP ahp = new AHP();
-                ahpResult = ahp.AHPOperation(jsonObj);
-                configResult = ckrService.findCKRByIndex(ahpResult).getConfig();
+                if (jsonObj.getString("category").equals("Comment")) {
+                } else {
+                    AHP ahp = new AHP();
+                    ahpResult = ahp.AHPOperation(jsonObj);
+                    configResult = ckrService.findCKRByIndex(ahpResult).getConfig();
 
-                //made resultJsonObj
-                jsonObjOne.put("category", jsonObj.getString("category"));
-                jsonObjOne.put("text", jsonObj.getString("text"));
-                jsonObjOne.put("index", ahpResult);
-                jsonObjOne.put("config", JSON.parse(configResult));
+                    // made resultJsonObj
+                    jsonObjOne.put("category", jsonObj.getString("category"));
+                    jsonObjOne.put("text", jsonObj.getString("text"));
+                    jsonObjOne.put("index", ahpResult);
+                    jsonObjOne.put("config", JSON.parse(configResult));
 
-                //made resultJsonArray
-                resultJsonArray.add(jsonObjOne);
+                    // made resultJsonArray
+                    resultJsonArray.add(jsonObjOne);
 
-                //System.out.println(resultJsonObj);
-                //System.out.println(configResult);
-                //System.out.println(jsonObj.get("category"));
-            }    
+                }
+                // System.out.println(resultJsonObj);
+                // System.out.println(configResult);
+                // System.out.println(jsonObj.get("category"));
+            }
         }
 
-        //System.out.println(json.get("class"));
-        //json = JSON.parseObject(ahpResult);
+        // System.out.println(json.get("class"));
+        // json = JSON.parseObject(ahpResult);
 
-        //System.out.println(json);
+        // System.out.println(json);
 
         return JSONArray.toJSONString(resultJsonArray);
     }
