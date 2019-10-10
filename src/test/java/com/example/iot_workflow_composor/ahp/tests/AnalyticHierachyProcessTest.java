@@ -20,8 +20,8 @@ public class AnalyticHierachyProcessTest {
 	@Test
 	public void testEvaluate() {
 
-		double[][] criteria = { { 1, 1D / 2D, 3 }, { 2, 1, 4 },
-					{ 1D / 3D, 1D / 4D, 1 } };
+		double[][] criteria = { { 1, 1D / 2D, 5 }, { 2, 1, 4 },
+					{ 1D / 5D, 1D / 4D, 1 } };
 		Matrix criteriaMatrix = new Matrix(criteria);
 		Decision decision = new Decision();
 		Goal goal = new Goal();

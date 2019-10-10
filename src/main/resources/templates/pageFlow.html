@@ -505,9 +505,10 @@
         url: "hello",
         data: jsonObj,
         contentType: "application/json;charsetset=UTF-8",
-        dataType: "json",
-        success: function(result) {
-          alert(result);
+        dataType: "text",
+        success: function(data) {
+          //alert(data);
+          document.getElementById("myConfigResult").value = data;
         }
       });
     }
@@ -676,6 +677,10 @@
          }
       ]
    }
+  </textarea>
+  <br />
+  Configuration Result JSON:
+  <textarea id="myConfigResult" style="width:100%;height:300px">
   </textarea>
 </div>
 </body>

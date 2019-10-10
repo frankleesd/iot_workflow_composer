@@ -21,24 +21,24 @@ public class UseCase {
 	@Test
 	public void UseCaseTest() {
 		Decision<Alternative> decision = new Decision<Alternative>();
-		decision.setName("CKR selection");
+		decision.setName("Cloud Computing Provider Selection");
 
 		Goal g1 = new Goal("Costs");
 		g1.setGoalType(GoalType.NEGATIVE);
-		Goal g2 = new Goal("Performance");
-		Goal g3 = new Goal("CPU capacity");
-		Goal g4 = new Goal("QoS");
+		Goal g2 = new Goal("Usability");
+		Goal g3 = new Goal("Reputation");
+		Goal g4 = new Goal("Service Level Agreements");
 		Goal g5 = new Goal("Architecture");
 
 		// Costs
-		Criterion c11 = new Criterion("Devices Cost");
-		Criterion c12 = new Criterion("Network Pricing Model");
+		Criterion c11 = new Criterion("Monthly Costs");
+		Criterion c12 = new Criterion("Pricing Model");
 		Criterion c13 = new Criterion("Rebates/Discounts");
 		g1.addChild(c11);
 		g1.addChild(c12);
 		g1.addChild(c13);
 
-		// Performance
+		// Usability
 		Criterion c21 = new Criterion("User Interface");
 		Criterion c22 = new Criterion("Documentation");
 		Criterion c23 = new Criterion("Online Support");
@@ -52,7 +52,7 @@ public class UseCase {
 		g3.addChild(c31);
 		g3.addChild(c32);
 
-		// QoS
+		// Service Level Agreements
 		Criterion c41 = new Criterion("Availability");
 		Criterion c42 = new Criterion("Performance");
 
@@ -69,11 +69,11 @@ public class UseCase {
 
 		// defining Alternatives
 		Alternative a1 = new Alternative();
-		a1.setName("CKR1");
+		a1.setName("Amazon Web Services");
 		Alternative a2 = new Alternative();
-		a2.setName("CKR2");
+		a2.setName("Rackspace UK");
 		Alternative a3 = new Alternative();
-		a3.setName("CKR3");
+		a3.setName("Terremark vCloud Express");
 
 		decision.addGoal(g1);
 		decision.addGoal(g2);
@@ -99,7 +99,7 @@ public class UseCase {
 
 		System.out.println("\n Weights of Goals");
 		decision.getImportanceGoals(GoalType.POSITIVE).add(
-				new GoalImportance(0, 1, 3D, null));
+				new GoalImportance(0, 1, 4D, null));
 		decision.getImportanceGoals(GoalType.POSITIVE).add(
 				new GoalImportance(0, 2, 3D, null));
 		decision.getImportanceGoals(GoalType.POSITIVE).add(
@@ -124,13 +124,13 @@ public class UseCase {
 		ahp.setChildrenCriteriaWeights(g2, ccrit2, 15);
 
 		System.out.println("\n Weights of Criteria Reputation");
-		double[][] crit3 = { { 1, 1 }, { 1, 1 } };
+		double[][] crit3 = { { 1, 5 }, { 1 / 5D, 1 } };
 		Matrix ccrit3 = new Matrix(crit3);
 		// ccrit3.print(2,2);
 		ahp.setChildrenCriteriaWeights(g3, ccrit3, 15);
 
 		System.out.println("\n Weights of Criteria SLA");
-		double[][] crit4 = { { 1, 1 }, { 1, 1 } };
+		double[][] crit4 = { { 1, 9 }, { 1 / 9D, 1 } };
 		Matrix ccrit4 = new Matrix(crit4);
 		// ccrit4.print(2,2);
 		ahp.setChildrenCriteriaWeights(g4, ccrit4, 15);
@@ -147,18 +147,17 @@ public class UseCase {
 
 		// Costs Goal Evaluation
 		Evaluation ev = new Evaluation();
-		// Devices Cost
+		// Monthly Costs
 		double crit11[][] = { { 1, 2D / 3D, 4D / 5D }, { 3D / 2D, 1, 6D / 5D },
 				{ 5D / 4D, 5D / 6D, 1 } };
 		Matrix crit11M = new Matrix(crit11);
 		ev.getEvaluations().add(crit11M);
 
-		// Network Pricing Model
+		// Pricing Model
 		double crit12[][] = { { 1, 6, 1D / 3D }, { 1D / 6D, 1, 1D / 8D },
 				{ 3, 8, 1 } };
 		Matrix crit12M = new Matrix(crit12);
 		ev.getEvaluations().add(crit12M);
-		
 		// Rebates
 		double crit13[][] = { { 1, 8, 8 }, { 1D / 8D, 1, 1 }, { 1D / 8D, 1, 1 } };
 		Matrix crit13M = new Matrix(crit13);
@@ -238,6 +237,18 @@ public class UseCase {
 		ev.getEvaluations().add(crit53M);
 
 		evals.add(ev);
+
+		/*
+		 * String[] criteriaValues = new String[3]; CriteriaMatrix cMc11 = new
+		 * CriteriaMatrix(); cMc11.getCriteriaList().add(c1);
+		 * cMc11.getCriteriaList().add(c2); cMc11.getCriteriaList().add(c3);
+		 * 
+		 * criteriaValues[0] = "-4"; // Amazon wird mit Rackspace verglichen
+		 * criteriaValues[1] = "-3"; // Amazon wird mit Terremark verglichen
+		 * criteriaValues[2] = "1"; // Rackspace wird mit Terremark verglichen
+		 * cMc11.addMatrixWeights(criteriaValues); cMc11.getMatrix().print(2,
+		 * 2); ev.getEvaluations().add(cMc11);
+		 */
 
 		try {
 			System.out.println(((Goal) decision.getGoals().iterator().next())
