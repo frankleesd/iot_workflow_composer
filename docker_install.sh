@@ -1,5 +1,4 @@
 #!/bin/bash
-sudo apt-get install -y sshpass
 
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
@@ -29,3 +28,6 @@ sudo systemctl daemon-reload
 
 #5 restart docker
 sudo systemctl restart docker
+
+#install sshpass
+sudo apt-get install -y sshpass
