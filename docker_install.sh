@@ -1,4 +1,6 @@
- #!/bin/bash
+#!/bin/bash
+sudo apt-get install -y sshpass
+
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 #1 Change dir
